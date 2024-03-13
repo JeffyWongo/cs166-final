@@ -365,8 +365,8 @@ public class Amazon {
       }
    }
 
-   /***/ private int userID; /***/
-   /***/ private ArrayList<Integer> nearbyStores = new ArrayList<Integer>(); /***/
+   /***/ private int userID; /***/ //the id of the current user according to the database
+   /***/ private ArrayList<Integer> nearbyStores = new ArrayList<Integer>(); /***/ //list of the store ids of all stores within 30 miles of the user's lat and long
 
    //Check log in credentials for an existing user @return User login or null is the user does not exist
    public static String LogIn(Amazon esql){
@@ -398,6 +398,8 @@ public class Amazon {
    }
 
    // Rest of the functions definition go in here
+
+//William
    /*
     * Saves all stores within 30 miles of user into class member
     * I moved this out of the viewStores method because other
@@ -433,6 +435,7 @@ public class Amazon {
       }
    }
 
+//William
    public static void viewStores(Amazon esql) {
       System.out.println("\nStores(shown as store ID's) within 30 miles");
       System.out.println("-------------------------------------------");
@@ -442,6 +445,7 @@ public class Amazon {
       System.out.println();
    }
 
+//William
    public static void viewProducts(Amazon esql) {
       String query, ID, str;
       int IDint;
@@ -466,6 +470,8 @@ public class Amazon {
       }
    }
 
+//William
+//check to see if a string contains only numbers
    public static boolean isNumeric(String str) {
       try {
          Integer.parseInt(str);
@@ -476,6 +482,8 @@ public class Amazon {
       }
    }
 
+//William
+//sub-function of placeOrder()
    public static int selectStore(Amazon esql) {
       String ID;
       int IDint;
@@ -516,6 +524,7 @@ public class Amazon {
       StoreID = esql.selectStore(esql);
    }
 
+//William
    public static void viewRecentOrders(Amazon esql) {}
 
    public static void updateProduct(Amazon esql) {}
