@@ -540,10 +540,43 @@ public class Amazon {
    public static void updateProduct(Amazon esql) {}
 
    public static void viewRecentUpdates(Amazon esql) {}
+   
+   public static void viewPopularProducts(Amazon esql) {
+      try {
+         System.out.print("Enter manager's user ID: ");
+         int managerID = Integer.parseInt(in.readLine());
+         String query = "SELECT p.productName, SUM(o.unitsOrdered) AS totalOrdered " +
+                        "FROM Orders o " +
+                        "JOIN Product p ON o.storeID = p.storeID AND o.productName = p.productName " +
+                        "JOIN Store s ON o.storeID = s.storeID " +
+                        "WHERE s.managerID = " + managerID + " " +
+                        "GROUP BY p.productName " +
+                        "ORDER BY totalOrdered DESC " +
+                        "LIMIT 5";
+         
+         esql.executeQueryAndPrintResult(query);
+     } catch (Exception e) {
+         System.err.println("Error: " + e.getMessage());
+     }
+ }
 
-   public static void viewPopularProducts(Amazon esql) {}
-
-   public static void viewPopularCustomers(Amazon esql) {}
+   public static void viewPopularCustomers(Amazon esql) {
+      try {
+         System.out.print("Enter manager's user ID: ");
+         int managerID = Integer.parseInt(in.readLine());
+ 
+         String query = "SELECT U.name, COUNT(*) AS orderCount " +
+                        "FROM Orders O, Users U, Store S " +
+                        "WHERE O.customerID = U.userID AND O.storeID = S.storeID AND S.managerID = " + managerID + " " +
+                        "GROUP BY U.name " +
+                        "ORDER BY orderCount DESC " +
+                        "LIMIT 5";
+ 
+         esql.executeQueryAndPrintResult(query);
+     } catch (Exception e) {
+         System.err.println("Error: " + e.getMessage());
+     }
+   }
 
    public static void placeProductSupplyRequests(Amazon esql) {}
 
