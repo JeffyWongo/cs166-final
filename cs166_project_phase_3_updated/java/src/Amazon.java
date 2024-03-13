@@ -251,6 +251,7 @@ public class Amazon {
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
+            //System.out.println("Please make your choice: ");
             //switch (readChoice()){
             System.out.println("Please make your choice: 2");
             switch (2){
@@ -524,9 +525,18 @@ public class Amazon {
       StoreID = esql.selectStore(esql);
    }
 
-//William
-   public static void viewRecentOrders(Amazon esql) {}
+//William And Jeffrey
+//I think this function will show 5 recent orders if account is non manager and all if manager
+//I will do the user side and you can do the manager side
+//You will need to edit the lines in LogIn() to ask for the account stuff
+//Currently I have it set to log in automatically to Line 3 in users.csv
+   public static void viewRecentOrders(Amazon esql) {
+      //pseudocode
+      //if user then view own most recent 5
+      //if manager then all order info of stores they manage
+   }
 
+//Rest are Jeffrey
    public static void updateProduct(Amazon esql) {}
 
    public static void viewRecentUpdates(Amazon esql) {}
