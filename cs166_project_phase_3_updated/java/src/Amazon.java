@@ -277,6 +277,7 @@ public class Amazon {
                System.out.println("7. View 5 Popular Items");
                System.out.println("8. View 5 Popular Customers");
                System.out.println("9. Place Product Supply Request to Warehouse");
+               System.out.println("10. View Product Supply Requests");
 
                System.out.println(".........................");
                System.out.println("20. Log out");
@@ -291,6 +292,7 @@ public class Amazon {
                   case 7: viewPopularProducts(esql); break;
                   case 8: viewPopularCustomers(esql); break;
                   case 9: placeProductSupplyRequests(esql); break;
+                  case 10: viewProductSupplyRequests(esql); break;
 
                   case 20: usermenu = false; break;
                   default : System.out.println("Unrecognized choice!"); break;
@@ -537,9 +539,118 @@ public class Amazon {
    }
 
 //Rest are Jeffrey
-   public static void updateProduct(Amazon esql) {}
+   public static void updateProduct(Amazon esql) {
+      try {
+         // Prompt the user for manager ID
+         int managerID;
+         do {
+             System.out.print("Enter your manager ID: ");
+             try {
+                 managerID = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid manager ID.");
+             }
+         } while (true);
+ 
+         // Prompt the user for store ID
+         int storeID;
+         do {
+             System.out.print("Enter the store ID: ");
+             try {
+                 storeID = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid store ID.");
+             }
+         } while (true);
+ 
+         // Check if the manager manages the given store
+         String checkManagerQuery = "SELECT COUNT(*) FROM Store WHERE managerID = " + managerID + " AND storeID = " + storeID;
+         if (esql.executeQuery(checkManagerQuery) == 0) {
+             System.out.println("You don't manage the store with ID " + storeID);
+             return;
+         }
+         // Prompt the user for product information updates
+         String productName;
+         do {
+             System.out.print("Enter the product name: ");
+             productName = in.readLine().trim();
+             if (productName.isEmpty()) {
+                 System.out.println("Product name cannot be empty.");
+             }
+         } while (productName.isEmpty());
+ 
+         int newNumberOfUnits;
+         do {
+             System.out.print("Enter the new number of units: ");
+             try {
+                 newNumberOfUnits = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid number.");
+             }
+         } while (true);
+ 
+         float newPricePerUnit;
+         do {
+             System.out.print("Enter the new price per unit: ");
+             try {
+                 newPricePerUnit = Float.parseFloat(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid price.");
+             }
+         } while (true);
+ 
+         // Update product information
+         String updateProductQuery = "UPDATE Product SET numberOfUnits = " + newNumberOfUnits + ", pricePerUnit = " + newPricePerUnit +
+                 " WHERE storeID = " + storeID + " AND productName = '" + productName + "'";
+         esql.executeUpdate(updateProductQuery);
+ 
+         // Update ProductUpdates table
+         String insertProductUpdateQuery = "INSERT INTO ProductUpdates (managerID, storeID, productName, updatedOn) VALUES (" +
+                 managerID + ", " + storeID + ", '" + productName + "', CURRENT_TIMESTAMP)";
+         esql.executeUpdate(insertProductUpdateQuery);
+ 
+         System.out.println("Product information updated successfully!");
+     } catch (Exception e) {
+         System.err.println("Error: " + e.getMessage());
+     }
+   }
 
-   public static void viewRecentUpdates(Amazon esql) {}
+   public static void viewRecentUpdates(Amazon esql) {
+      try {
+         // Prompt the user for manager ID
+         int managerID;
+         do {
+             System.out.print("Enter your manager ID: ");
+             try {
+                 managerID = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid manager ID.");
+             }
+         } while (true);
+ 
+         // Retrieve the store IDs managed by the manager
+         String getManagedStoresQuery = "SELECT storeID FROM Store WHERE managerID = " + managerID;
+         List<List<String>> managedStores = esql.executeQueryAndReturnResult(getManagedStoresQuery);
+         if (managedStores.isEmpty()) {
+             System.out.println("You don't manage any stores.");
+             return;
+         }
+ 
+         // Fetch the last 5 recent updates for all managed stores
+         String viewRecentUpdatesQuery = "SELECT storeID, productName, updatedOn " +
+                 "FROM ProductUpdates WHERE storeID IN (SELECT storeID FROM Store WHERE managerID = " + managerID +
+                 ") ORDER BY updatedOn DESC LIMIT 5";
+         System.out.println("Recent updates for your managed stores:");
+         esql.executeQueryAndPrintResult(viewRecentUpdatesQuery);
+     } catch (Exception e) {
+         System.err.println("Error: " + e.getMessage());
+     }
+   }
    
    public static void viewPopularProducts(Amazon esql) {
       try {
@@ -578,7 +689,128 @@ public class Amazon {
      }
    }
 
-   public static void placeProductSupplyRequests(Amazon esql) {}
+   public static void placeProductSupplyRequests(Amazon esql) {
+      try {
+         // Prompt the user for manager ID
+         int managerID;
+         do {
+             System.out.print("Enter your manager ID: ");
+             try {
+                 managerID = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid manager ID.");
+             }
+         } while (true);
+ 
+         // Retrieve the store IDs managed by the manager
+         String getManagedStoresQuery = "SELECT storeID FROM Store WHERE managerID = " + managerID;
+         List<List<String>> managedStores = esql.executeQueryAndReturnResult(getManagedStoresQuery);
+         if (managedStores.isEmpty()) {
+             System.out.println("You don't manage any stores.");
+             return;
+         }
+ 
+         // Prompt the user for store ID
+         int storeID;
+         do {
+             System.out.print("Enter the store ID: ");
+             try {
+                 storeID = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid store ID.");
+             }
+         } while (true);
+ 
+         // Prompt the user for product name
+         System.out.print("Enter product name: ");
+         String productName = in.readLine();
+ 
+         // Prompt the user for number of units needed
+         int numberOfUnits;
+         do {
+             System.out.print("Enter number of units needed: ");
+             try {
+                 numberOfUnits = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid number.");
+             }
+         } while (true);
+ 
+         // Prompt the user for warehouse ID
+         int warehouseID;
+         do {
+             System.out.print("Enter warehouse ID: ");
+             try {
+                 warehouseID = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid warehouse ID.");
+             }
+         } while (true);
+ 
+         // Update the Product table
+         String updateProductQuery = "UPDATE Product SET numberOfUnits = numberOfUnits + " + numberOfUnits +
+                                     " WHERE storeID = " + storeID + " AND productName = '" + productName + "'";
+         esql.executeUpdate(updateProductQuery);
+ 
+         // Insert the supply request into the ProductSupplyRequests table
+         String insertSupplyRequestQuery = "INSERT INTO ProductSupplyRequests (managerID, warehouseID, storeID, productName, unitsRequested) " +
+                 "VALUES (" + managerID + ", " + warehouseID + ", " + storeID + ", '" + productName + "', " + numberOfUnits + ")";
+         esql.executeUpdate(insertSupplyRequestQuery);
+ 
+         System.out.println("Supply request placed successfully.");
+     } catch (Exception e) {
+         System.err.println("Error: " + e.getMessage());
+     }
+   }
 
+   public static void viewProductSupplyRequests(Amazon esql) {
+      try {
+          // Prompt the user for manager ID
+          int managerID;
+          do {
+              System.out.print("Enter your manager ID: ");
+              try {
+                  managerID = Integer.parseInt(in.readLine());
+                  break;
+              } catch (NumberFormatException e) {
+                  System.out.println("Invalid input! Please enter a valid manager ID.");
+              }
+          } while (true);
+  
+          // Retrieve the store IDs managed by the manager
+          String getManagedStoresQuery = "SELECT storeID FROM Store WHERE managerID = " + managerID;
+          List<List<String>> managedStores = esql.executeQueryAndReturnResult(getManagedStoresQuery);
+          if (managedStores.isEmpty()) {
+              System.out.println("You don't manage any stores.");
+              return;
+          }
+  
+         // Prompt the user for store ID
+         int storeID;
+         do {
+             System.out.print("Enter the store ID: ");
+             try {
+                 storeID = Integer.parseInt(in.readLine());
+                 break;
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input! Please enter a valid store ID.");
+             }
+         } while (true);
+  
+          // Query to select recent product supply requests for the manager's store
+          String viewProductSupplyRequestsQuery = "SELECT * FROM ProductSupplyRequests WHERE storeID = " + storeID +
+                  " ORDER BY requestNumber DESC LIMIT 5";
+  
+          // Execute the query and print the results
+          esql.executeQueryAndPrintResult(viewProductSupplyRequestsQuery);
+      } catch (Exception e) {
+          System.err.println("Error: " + e.getMessage());
+      }
+  }
+  
 }//end Amazon
 
