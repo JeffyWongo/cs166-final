@@ -278,6 +278,13 @@ public class Amazon {
                System.out.println("9. Place Product Supply Request to Warehouse");
                System.out.println("10. View Product Supply Requests");
 
+               if(esql.userID == 1) {
+                  System.out.println("11. List all users");
+                  System.out.println("12. Update a user");
+                  System.out.println("13. List all products");
+                  System.out.println("14. Update a product");
+               }
+
                System.out.println(".........................");
                System.out.println("20. Log out");
 
@@ -292,6 +299,14 @@ public class Amazon {
                   case 8: viewPopularCustomers(esql); break;
                   case 9: placeProductSupplyRequests(esql); break;
                   case 10: viewProductSupplyRequests(esql); break;
+                  case 11: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                           viewAllUsers(esql); break;
+                  case 12: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                           updateAnyUser(esql); break;
+                  case 13: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                           viewAllProducts(esql); break;
+                  case 14: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                           updateAnyProduct(esql); break;
 
                   case 20: usermenu = false; break;
                   default : System.out.println("Unrecognized choice!"); break;
@@ -1029,5 +1044,20 @@ public static int checkIfManager(Amazon esql) {
       }
   }
 
+   public static void viewAllUsers(Amazon esql) {
+
+   }
+
+   public static void updateAnyUser(Amazon esql) {
+
+   }
+
+   public static void viewAllProducts(Amazon esql) {
+      
+   }
+
+   public static void updateAnyProduct(Amazon esql) {
+      
+   }
 }//end Amazon
 
