@@ -278,7 +278,7 @@ public class Amazon {
                System.out.println("9. Place Product Supply Request to Warehouse");
                System.out.println("10. View Product Supply Requests");
 
-               if(esql.userID == 1) {
+               if(esql.userType.equals("admin")) {
                   System.out.println("11. List all users");
                   System.out.println("12. Update a user");
                   System.out.println("13. List all products");
@@ -299,13 +299,13 @@ public class Amazon {
                   case 8: viewPopularCustomers(esql); break;
                   case 9: placeProductSupplyRequests(esql); break;
                   case 10: viewProductSupplyRequests(esql); break;
-                  case 11: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                  case 11: if(!esql.userType.equals("admin")){System.out.println("Unrecognized choice!"); break;}
                            viewAllUsers(esql); break;
-                  case 12: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                  case 12: if(!esql.userType.equals("admin")){System.out.println("Unrecognized choice!"); break;}
                            updateAnyUser(esql); break;
-                  case 13: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                  case 13: if(!esql.userType.equals("admin")){System.out.println("Unrecognized choice!"); break;}
                            viewAllProducts(esql); break;
-                  case 14: if(esql.userID != 1){System.out.println("Unrecognized choice!"); break;}
+                  case 14: if(!esql.userType.equals("admin")){System.out.println("Unrecognized choice!"); break;}
                            updateAnyProduct(esql); break;
 
                   case 20: usermenu = false; break;
@@ -385,6 +385,7 @@ public class Amazon {
    /***/ private int userID; /***/ //the id of the current user according to the database
    /***/ private ArrayList<Integer> nearbyStores = new ArrayList<Integer>(); /***/ //list of the store ids of all stores within 30 miles of the user's lat and long
    /***/ private ArrayList<Integer> managerList = new ArrayList<Integer>(); /***/ //list of all manager ids
+   /***/ private String userType = "";
 
    //Check log in credentials for an existing user @return User login or null is the user does not exist
    public static String LogIn(Amazon esql){
@@ -402,9 +403,10 @@ public class Amazon {
          String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
 
-         query = String.format("SELECT userID FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
+         query = String.format("SELECT userID, type FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          List<List<String>> res = esql.executeQueryAndReturnResult(query);
          esql.userID = Integer.parseInt(res.get(0).get(0));
+         esql.userType = res.get(0).get(1).trim();
 	 if (userNum > 0)
 		return name;
          return null;
