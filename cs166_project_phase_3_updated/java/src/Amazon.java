@@ -651,7 +651,7 @@ public class Amazon {
    public static void insertOrder(Amazon esql, int storeID, String pname, int count) {
       String query;
       try {
-         query = String.format("INSERT INTO Orders Values(DEFAULT, %d, %d, '%s', %d, CURRENT_TIMESTAMP)", esql.userID, storeID, pname, count);
+         query = String.format("INSERT INTO Orders Values(DEFAULT, %d, %d, '%s', %d, DATE_TRUNC('second', CURRENT_TIMESTAMP))", esql.userID, storeID, pname, count);
          esql.executeUpdate(query);
          query = String.format("UPDATE Product SET numberOfUnits = numberOfUnits - %d WHERE storeID = %d AND productName = '%s'", count, storeID, pname);
          esql.executeUpdate(query);
@@ -714,7 +714,7 @@ public class Amazon {
                      case "n":
                         return;
                      default:
-                        System.out.println("Error at order confirmation");
+                        System.out.println("Invalid input");
                   }
                }
                catch (Exception e) {
