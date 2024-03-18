@@ -268,16 +268,25 @@ public class Amazon {
                System.out.println("1. View Stores within 30 miles");
                System.out.println("2. View Product List");
                System.out.println("3. Place a Order");
-               System.out.println("4. View 5 recent orders");
 
+               if(esql.userType.equals("manager")) {
+                  System.out.println("4. View recent orders");
+               }
+               else {//user
+                  System.out.println("4. View 5 recent orders");
+               }
+               
                //the following functionalities basically used by managers
-               System.out.println("5. Update Product");
-               System.out.println("6. View 5 recent Product Updates Info");
-               System.out.println("7. View 5 Popular Items");
-               System.out.println("8. View 5 Popular Customers");
-               System.out.println("9. Place Product Supply Request to Warehouse");
-               System.out.println("10. View Product Supply Requests");
+               if(!esql.userType.equals("customer")) {
+                  System.out.println("5. Update Product");
+                  System.out.println("6. View 5 recent Product Updates Info");
+                  System.out.println("7. View 5 Popular Items");
+                  System.out.println("8. View 5 Popular Customers");
+                  System.out.println("9. Place Product Supply Request to Warehouse");
+                  System.out.println("10. View Product Supply Requests");
+               }
 
+               //admin functions
                if(esql.userType.equals("admin")) {
                   System.out.println("11. List all users");
                   System.out.println("12. Update a user");
@@ -293,12 +302,18 @@ public class Amazon {
                   case 2: viewProducts(esql); break;
                   case 3: placeOrder(esql); break;
                   case 4: viewRecentOrders(esql); break;
-                  case 5: updateProduct(esql); break;
-                  case 6: viewRecentUpdates(esql); break;
-                  case 7: viewPopularProducts(esql); break;
-                  case 8: viewPopularCustomers(esql); break;
-                  case 9: placeProductSupplyRequests(esql); break;
-                  case 10: viewProductSupplyRequests(esql); break;
+                  case 5: if(esql.userType.equals("customer")){System.out.println("Unrecognized choice!"); break;}
+                           updateProduct(esql); break;
+                  case 6: if(esql.userType.equals("customer")){System.out.println("Unrecognized choice!"); break;}
+                           viewRecentUpdates(esql); break;
+                  case 7: if(esql.userType.equals("customer")){System.out.println("Unrecognized choice!"); break;}
+                           viewPopularProducts(esql); break;
+                  case 8: if(esql.userType.equals("customer")){System.out.println("Unrecognized choice!"); break;}
+                           viewPopularCustomers(esql); break;
+                  case 9: if(esql.userType.equals("customer")){System.out.println("Unrecognized choice!"); break;}
+                           placeProductSupplyRequests(esql); break;
+                  case 10: if(esql.userType.equals("customer")){System.out.println("Unrecognized choice!"); break;}
+                           viewProductSupplyRequests(esql); break;
                   case 11: if(!esql.userType.equals("admin")){System.out.println("Unrecognized choice!"); break;}
                            viewAllUsers(esql); break;
                   case 12: if(!esql.userType.equals("admin")){System.out.println("Unrecognized choice!"); break;}
@@ -1046,17 +1061,17 @@ public static int checkIfManager(Amazon esql) {
       }
   }
 
-  public static void viewAllUsers(Amazon esql) {
-     try {
+   public static void viewAllUsers(Amazon esql) {
+   try {
         String query = "SELECT * FROM Users";
         esql.executeQueryAndPrintResult(query);
      } catch (Exception e) {
         System.err.println("Error: " + e.getMessage());
      }
-  }
+   }
 
-  public static void updateAnyUser(Amazon esql) {
-   try {
+   public static void updateAnyUser(Amazon esql) {
+try {
        int userID;
        do {
            System.out.print("Enter the user ID of the user to update: ");
@@ -1110,10 +1125,10 @@ public static int checkIfManager(Amazon esql) {
       } catch (Exception e) {
           System.err.println("Error: " + e.getMessage());
       }
-  }
-  
-  public static void updateAnyProduct(Amazon esql) {
-   try {
+   }
+
+   public static void updateAnyProduct(Amazon esql) {
+      try {
        System.out.print("Enter the store ID: ");
        int storeID = Integer.parseInt(in.readLine().trim());
 
@@ -1143,6 +1158,6 @@ public static int checkIfManager(Amazon esql) {
    } catch (Exception e) {
        System.err.println("Error: " + e.getMessage());
    }
-}
+   }
 }//end Amazon
 
