@@ -1112,7 +1112,6 @@ public static int checkIfManager(Amazon esql) {
       }
   }
   
-
   public static void updateAnyProduct(Amazon esql) {
    try {
        System.out.print("Enter the store ID: ");
@@ -1145,6 +1144,5 @@ public static int checkIfManager(Amazon esql) {
        System.err.println("Error: " + e.getMessage());
    }
 }
-
 }//end Amazon
 
