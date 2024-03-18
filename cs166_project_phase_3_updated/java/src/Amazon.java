@@ -263,6 +263,7 @@ public class Amazon {
             if (authorisedUser != null) {
               boolean usermenu = true;
               loadNearbyStores(esql);
+              loadManagers(esql);
               while(usermenu) {
                System.out.println("MAIN MENU");
                System.out.println("---------");
@@ -370,6 +371,7 @@ public class Amazon {
 
    /***/ private int userID; /***/ //the id of the current user according to the database
    /***/ private ArrayList<Integer> nearbyStores = new ArrayList<Integer>(); /***/ //list of the store ids of all stores within 30 miles of the user's lat and long
+   /***/ private ArrayList<Integer> managerList = new ArrayList<Integer>(); /***/ //list of all manager ids
 
    //Check log in credentials for an existing user @return User login or null is the user does not exist
    public static String LogIn(Amazon esql){
@@ -428,6 +430,25 @@ public class Amazon {
             if(esql.calculateDistance(lat1, long1, lat2, long2) < 30) {
                esql.nearbyStores.add(Integer.parseInt(res.get(i).get(0)));
             }
+         }
+         System.out.println();
+         return;
+      }
+      catch (Exception e) {
+         System.err.println (e.getMessage ());
+         return;
+      }
+   }
+
+   public static void loadManagers(Amazon esql) {
+      esql.managerList.clear();
+      String query;
+      List<List<String>> res;
+      try {
+         query = String.format("SELECT DISTINCT managerID FROM Store");
+         res = esql.executeQueryAndReturnResult(query);
+         for (int i = 0; i < res.size(); i++) {
+            esql.managerList.add(Integer.parseInt(res.get(i).get(0)));
          }
          System.out.println();
          return;
@@ -595,13 +616,29 @@ public class Amazon {
       }
    }
 
+//William
+//sub-funciton4 of placeOrder()
+   public static void insertOrder(Amazon esql, int storeID, String pname, int count) {
+      String query;
+      try {
+         query = String.format("INSERT INTO Orders Values(DEFAULT, %d, %d, '%s', %d, CURRENT_TIMESTAMP)", esql.userID, storeID, pname, count);
+         esql.executeUpdate(query);
+         query = String.format("UPDATE Product SET numberOfUnits = numberOfUnits - %d WHERE storeID = %d AND productName = '%s'", count, storeID, pname);
+         esql.executeUpdate(query);
+      }
+      catch (Exception e) {
+         System.err.println (e.getMessage ());
+         return;
+      } 
+   }
+
    public static void placeOrder(Amazon esql) {
+      int cur = 1;
+      String choice = "";
+
       int storeID = 0; //prevent initialization warning
       int count = 0;
       String pName = "";
-      String choice = "";
-      String product = "";
-      int cur = 1;
    
       while(true) {
          switch(cur) {
@@ -635,9 +672,9 @@ public class Amazon {
                System.out.println("\nStore ID: " + storeID + "   Product: " + pName + "     Quantity: " + count);
                System.out.println("Enter y to confirm order\nEnter b to go back\nEnter n to cancel order");
                try {
-                  product = in.readLine();
-                  product = product.trim();
-                  switch(product) {
+                  choice = in.readLine();
+                  choice = choice.trim();
+                  switch(choice) {
                      case "y":
                         cur = 5;
                         break;
@@ -656,7 +693,8 @@ public class Amazon {
                }      
                break;
             case 5:
-               System.out.println("in case 5");
+               esql.insertOrder(esql, storeID, pName, count);
+               System.out.println("Order Placed!");
                return;
             default: break;
          }
@@ -672,9 +710,23 @@ public class Amazon {
       //pseudocode
       //if user then view own most recent 5
       //if manager then all order info of stores they manage
+      int isManager = 0;
+      String query;
+      int res;
+      isManager = esql.checkIfManager(esql);
+      if(isManager == -1) { //if user
+         try {
+            query = String.format("SELECT * FROM Orders WHERE CustomerID = %d ORDER BY orderTime DESC LIMIT 5", esql.userID);
+            res = esql.executeQueryAndPrintResult(query);
+         }
+         catch (Exception e) {
+            System.err.println (e.getMessage ());
+            return;
+         }           
+      }
+      return;
    }
-
-   public static int checkIfManager(Amazon esql) {
+public static int checkIfManager(Amazon esql) {
       try {
           int userID = esql.userID;
           String query = "SELECT userID FROM Users WHERE userID = " + userID + " AND type = 'manager'";
@@ -706,12 +758,12 @@ public class Amazon {
                  System.out.println("Invalid input! Please enter a valid store ID.");
              }
          } while (true);
-         
+ 
          // Check if the manager manages the given store
          String checkManagerQuery = "SELECT * FROM Store WHERE managerID = " + managerID + " AND storeID = " + storeID;
          if (esql.executeQueryAndReturnResult(checkManagerQuery).isEmpty()) {
-            System.out.println("You don't manage the store with ID " + storeID);
-            return;
+             System.out.println("You don't manage the store with ID " + storeID);
+             return;
          }
 
          // Prompt the user for product information updates
@@ -769,7 +821,7 @@ public class Amazon {
             System.out.println("You are not authorized to view recent updates.");
             return;
          }
-
+ 
          // Retrieve the store IDs managed by the manager
          String getManagedStoresQuery = "SELECT storeID FROM Store WHERE managerID = " + managerID;
          List<List<String>> managedStores = esql.executeQueryAndReturnResult(getManagedStoresQuery);
@@ -906,7 +958,7 @@ public class Amazon {
 
    public static void viewProductSupplyRequests(Amazon esql) {
       try {
-         int managerID = checkIfManager(esql);
+          int managerID = checkIfManager(esql);
          if (managerID == -1) {
             System.out.println("You are not authorized to view product supply requests.");
             return;
