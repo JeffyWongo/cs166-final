@@ -1046,20 +1046,105 @@ public static int checkIfManager(Amazon esql) {
       }
   }
 
-   public static void viewAllUsers(Amazon esql) {
+  public static void viewAllUsers(Amazon esql) {
+     try {
+        String query = "SELECT * FROM Users";
+        esql.executeQueryAndPrintResult(query);
+     } catch (Exception e) {
+        System.err.println("Error: " + e.getMessage());
+     }
+  }
 
+  public static void updateAnyUser(Amazon esql) {
+   try {
+       int userID;
+       do {
+           System.out.print("Enter the user ID of the user to update: ");
+           try {
+               userID = Integer.parseInt(in.readLine());
+               break;
+           } catch (NumberFormatException e) {
+               System.out.println("Invalid input! Please enter a valid user ID.");
+           }
+       } while (true);
+
+       // Check if the user exists
+       String checkUserQuery = "SELECT * FROM Users WHERE userID = " + userID;
+       if (esql.executeQueryAndReturnResult(checkUserQuery).isEmpty()) {
+           System.out.println("User with ID " + userID + " does not exist.");
+           return;
+       }
+
+       // Prompt for the new name and password
+       System.out.print("Enter the new name: ");
+       String newName = in.readLine().trim();
+
+       System.out.print("Enter the new password: ");
+       String newPassword = in.readLine().trim();
+
+       System.out.print("Enter the new latitude: ");
+       String newLatitude = in.readLine().trim();
+
+       System.out.print("Enter the new longitude: ");
+       String newLongitude = in.readLine().trim();
+
+       System.out.print("Enter the new type: ");
+       String newType = in.readLine().trim();
+
+       // Update the user information
+       String updateUserQuery = "UPDATE Users SET name = '" + newName + "', password = '" + newPassword +
+       "', latitude = " + newLatitude + ", longitude = " + newLongitude + ", type = '" + newType +
+       "' WHERE userID = " + userID;
+      esql.executeUpdate(updateUserQuery);
+
+       System.out.println("User information updated successfully!");
+   } catch (Exception e) {
+       System.err.println("Error: " + e.getMessage());
    }
-
-   public static void updateAnyUser(Amazon esql) {
-
-   }
+}
 
    public static void viewAllProducts(Amazon esql) {
-      
-   }
+      try {
+          String query = "SELECT * FROM Product";
+          esql.executeQueryAndPrintResult(query);
+      } catch (Exception e) {
+          System.err.println("Error: " + e.getMessage());
+      }
+  }
+  
 
-   public static void updateAnyProduct(Amazon esql) {
-      
+  public static void updateAnyProduct(Amazon esql) {
+   try {
+       System.out.print("Enter the store ID: ");
+       int storeID = Integer.parseInt(in.readLine().trim());
+
+       System.out.print("Enter the product name: ");
+       String productName = in.readLine().trim();
+
+       // Check if the product exists
+       String checkProductQuery = "SELECT * FROM Product WHERE storeID = " + storeID + " AND productName = '" + productName + "'";
+       if (esql.executeQueryAndReturnResult(checkProductQuery).isEmpty()) {
+           System.out.println("Product with name " + productName + " in store ID " + storeID + " does not exist.");
+           return;
+       }
+
+       // Prompt the user for the new number of units and price per unit
+       System.out.print("Enter the new number of units: ");
+       int newNumberOfUnits = Integer.parseInt(in.readLine().trim());
+
+       System.out.print("Enter the new price per unit: ");
+       float newPricePerUnit = Float.parseFloat(in.readLine().trim());
+
+       // Update the product information
+       String updateProductQuery = "UPDATE Product SET numberOfUnits = " + newNumberOfUnits +
+               ", pricePerUnit = " + newPricePerUnit + " WHERE storeID = " + storeID + " AND productName = '" + productName + "'";
+       esql.executeUpdate(updateProductQuery);
+
+       System.out.println("Product information updated successfully!");
+   } catch (Exception e) {
+       System.err.println("Error: " + e.getMessage());
    }
+}
+
 }//end Amazon
 
