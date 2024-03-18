@@ -250,7 +250,6 @@ public class Amazon {
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
-            System.out.println("Please make your choice: ");
             switch (readChoice()){
             // System.out.println("Please make your choice: 2");
             // switch (2){
