@@ -250,10 +250,10 @@ public class Amazon {
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
-            //System.out.println("Please make your choice: ");
-            //switch (readChoice()){
-            System.out.println("Please make your choice: 2");
-            switch (2){
+            System.out.println("Please make your choice: ");
+            switch (readChoice()){
+            // System.out.println("Please make your choice: 2");
+            // switch (2){
                case 1: CreateUser(esql); break;
                case 2: authorisedUser = LogIn(esql); break;
                case 9: keepon = false; break;
