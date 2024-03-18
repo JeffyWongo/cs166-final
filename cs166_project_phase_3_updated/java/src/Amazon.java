@@ -374,15 +374,15 @@ public class Amazon {
    //Check log in credentials for an existing user @return User login or null is the user does not exist
    public static String LogIn(Amazon esql){
       try{
-         // System.out.print("\tEnter name: ");
-         // String name = in.readLine();
-         // System.out.print("\tEnter password: ");
-         // String password = in.readLine();
+         System.out.print("\tEnter name: ");
+         String name = in.readLine();
+         System.out.print("\tEnter password: ");
+         String password = in.readLine();
 
-         System.out.println("\tEnter name: Amy");
-         System.out.println("\tEnter password: xyz");
-         String name = "Amy";
-         String password = "xyz";
+         // System.out.println("\tEnter name: Amy");
+         // System.out.println("\tEnter password: xyz");
+         // String name = "Amy";
+         // String password = "xyz";
 
          String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
@@ -674,20 +674,26 @@ public class Amazon {
       //if manager then all order info of stores they manage
    }
 
+   public static int checkIfManager(Amazon esql) {
+      try {
+          int userID = esql.userID;
+          String query = "SELECT userID FROM Users WHERE userID = " + userID + " AND type = 'manager'";
+          List<List<String>> result = esql.executeQueryAndReturnResult(query);
+          return result.isEmpty() ? -1 : Integer.parseInt(result.get(0).get(0));
+      } catch (Exception e) {
+          System.err.println("Error: " + e.getMessage());
+          return -1;
+      }
+  }
+
 //Rest are Jeffrey
    public static void updateProduct(Amazon esql) {
       try {
-         // Prompt the user for manager ID
-         int managerID;
-         do {
-             System.out.print("Enter your manager ID: ");
-             try {
-                 managerID = Integer.parseInt(in.readLine());
-                 break;
-             } catch (NumberFormatException e) {
-                 System.out.println("Invalid input! Please enter a valid manager ID.");
-             }
-         } while (true);
+         int managerID = checkIfManager(esql);
+         if (managerID == -1) {
+            System.out.println("You are not authorized update Product.");
+            return;
+         }
  
          // Prompt the user for store ID
          int storeID;
@@ -700,13 +706,14 @@ public class Amazon {
                  System.out.println("Invalid input! Please enter a valid store ID.");
              }
          } while (true);
- 
+         
          // Check if the manager manages the given store
-         String checkManagerQuery = "SELECT COUNT(*) FROM Store WHERE managerID = " + managerID + " AND storeID = " + storeID;
-         if (esql.executeQuery(checkManagerQuery) == 0) {
-             System.out.println("You don't manage the store with ID " + storeID);
-             return;
+         String checkManagerQuery = "SELECT * FROM Store WHERE managerID = " + managerID + " AND storeID = " + storeID;
+         if (esql.executeQueryAndReturnResult(checkManagerQuery).isEmpty()) {
+            System.out.println("You don't manage the store with ID " + storeID);
+            return;
          }
+
          // Prompt the user for product information updates
          String productName;
          do {
@@ -757,18 +764,12 @@ public class Amazon {
 
    public static void viewRecentUpdates(Amazon esql) {
       try {
-         // Prompt the user for manager ID
-         int managerID;
-         do {
-             System.out.print("Enter your manager ID: ");
-             try {
-                 managerID = Integer.parseInt(in.readLine());
-                 break;
-             } catch (NumberFormatException e) {
-                 System.out.println("Invalid input! Please enter a valid manager ID.");
-             }
-         } while (true);
- 
+         int managerID = checkIfManager(esql);
+         if (managerID == -1) {
+            System.out.println("You are not authorized to view recent updates.");
+            return;
+         }
+
          // Retrieve the store IDs managed by the manager
          String getManagedStoresQuery = "SELECT storeID FROM Store WHERE managerID = " + managerID;
          List<List<String>> managedStores = esql.executeQueryAndReturnResult(getManagedStoresQuery);
@@ -778,11 +779,12 @@ public class Amazon {
          }
  
          // Fetch the last 5 recent updates for all managed stores
-         String viewRecentUpdatesQuery = "SELECT storeID, productName, updatedOn " +
-                 "FROM ProductUpdates WHERE storeID IN (SELECT storeID FROM Store WHERE managerID = " + managerID +
-                 ") ORDER BY updatedOn DESC LIMIT 5";
-         System.out.println("Recent updates for your managed stores:");
-         esql.executeQueryAndPrintResult(viewRecentUpdatesQuery);
+         String viewRecentOrdersQuery = "SELECT O.orderNumber, U.name AS customerName, O.storeID, O.productName, O.orderTime " +
+                "FROM Orders O JOIN Users U ON O.customerID = U.userID " +
+                "WHERE O.storeID IN (SELECT storeID FROM Store WHERE managerID = " + managerID + ") " +
+                "ORDER BY O.orderTime DESC LIMIT 5";
+        System.out.println("Recent orders for your managed stores:");
+        esql.executeQueryAndPrintResult(viewRecentOrdersQuery);
      } catch (Exception e) {
          System.err.println("Error: " + e.getMessage());
      }
@@ -790,8 +792,11 @@ public class Amazon {
    
    public static void viewPopularProducts(Amazon esql) {
       try {
-         System.out.print("Enter manager's user ID: ");
-         int managerID = Integer.parseInt(in.readLine());
+         int managerID = checkIfManager(esql);
+         if (managerID == -1) {
+            System.out.println("You are not authorized to view popular products.");
+            return;
+         }
          String query = "SELECT p.productName, SUM(o.unitsOrdered) AS totalOrdered " +
                         "FROM Orders o " +
                         "JOIN Product p ON o.storeID = p.storeID AND o.productName = p.productName " +
@@ -809,8 +814,11 @@ public class Amazon {
 
    public static void viewPopularCustomers(Amazon esql) {
       try {
-         System.out.print("Enter manager's user ID: ");
-         int managerID = Integer.parseInt(in.readLine());
+         int managerID = checkIfManager(esql);
+         if (managerID == -1) {
+            System.out.println("You are not authorized to view popular customers.");
+            return;
+         }
  
          String query = "SELECT U.name, COUNT(*) AS orderCount " +
                         "FROM Orders O, Users U, Store S " +
@@ -827,17 +835,11 @@ public class Amazon {
 
    public static void placeProductSupplyRequests(Amazon esql) {
       try {
-         // Prompt the user for manager ID
-         int managerID;
-         do {
-             System.out.print("Enter your manager ID: ");
-             try {
-                 managerID = Integer.parseInt(in.readLine());
-                 break;
-             } catch (NumberFormatException e) {
-                 System.out.println("Invalid input! Please enter a valid manager ID.");
-             }
-         } while (true);
+         int managerID = checkIfManager(esql);
+         if (managerID == -1) {
+            System.out.println("You are not authorized to place product supply requests.");
+            return;
+         }
  
          // Retrieve the store IDs managed by the manager
          String getManagedStoresQuery = "SELECT storeID FROM Store WHERE managerID = " + managerID;
@@ -905,17 +907,11 @@ public class Amazon {
 
    public static void viewProductSupplyRequests(Amazon esql) {
       try {
-          // Prompt the user for manager ID
-          int managerID;
-          do {
-              System.out.print("Enter your manager ID: ");
-              try {
-                  managerID = Integer.parseInt(in.readLine());
-                  break;
-              } catch (NumberFormatException e) {
-                  System.out.println("Invalid input! Please enter a valid manager ID.");
-              }
-          } while (true);
+         int managerID = checkIfManager(esql);
+         if (managerID == -1) {
+            System.out.println("You are not authorized to view product supply requests.");
+            return;
+         }
   
           // Retrieve the store IDs managed by the manager
           String getManagedStoresQuery = "SELECT storeID FROM Store WHERE managerID = " + managerID;
@@ -936,6 +932,13 @@ public class Amazon {
                  System.out.println("Invalid input! Please enter a valid store ID.");
              }
          } while (true);
+
+         // Check if the manager manages the given store
+         String checkManagerQuery = "SELECT * FROM Store WHERE managerID = " + managerID + " AND storeID = " + storeID;
+         if (esql.executeQueryAndReturnResult(checkManagerQuery).isEmpty()) {
+            System.out.println("You don't manage the store with ID " + storeID);
+            return;
+         }
   
           // Query to select recent product supply requests for the manager's store
           String viewProductSupplyRequestsQuery = "SELECT * FROM ProductSupplyRequests WHERE storeID = " + storeID +
