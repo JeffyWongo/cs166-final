@@ -713,7 +713,7 @@ public class Amazon {
       int isManager = 0;
       String query;
       int res;
-      isManager = esql.checkIfManager(esql);
+      isManager = checkIfManager(esql);
       if(isManager == -1) { //if user
          try {
             query = String.format("SELECT * FROM Orders WHERE CustomerID = %d ORDER BY orderTime DESC LIMIT 5", esql.userID);
@@ -724,8 +724,22 @@ public class Amazon {
             return;
          }           
       }
+      else { // if manager
+         try {
+            query = "SELECT O.orderNumber, U.name, O.storeID, O.productName, O.orderTime " +
+            "FROM Orders O, Users U " +
+            "WHERE O.customerID = U.userID " +
+            "AND O.storeID IN (SELECT storeID FROM Store WHERE managerID = " + isManager + ") " +
+            "ORDER BY O.orderTime DESC";
+            res = esql.executeQueryAndPrintResult(query);
+         }
+         catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+      }
       return;
    }
+
 public static int checkIfManager(Amazon esql) {
       try {
           int userID = esql.userID;
@@ -911,6 +925,13 @@ public static int checkIfManager(Amazon esql) {
                  System.out.println("Invalid input! Please enter a valid store ID.");
              }
          } while (true);
+
+         // Check if the manager manages the given store
+         String checkManagerQuery = "SELECT * FROM Store WHERE managerID = " + managerID + " AND storeID = " + storeID;
+         if (esql.executeQueryAndReturnResult(checkManagerQuery).isEmpty()) {
+            System.out.println("You don't manage the store with ID " + storeID);
+            return;
+         }
  
          // Prompt the user for product name
          System.out.print("Enter product name: ");
