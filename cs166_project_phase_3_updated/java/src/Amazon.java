@@ -779,12 +779,11 @@ public class Amazon {
          }
  
          // Fetch the last 5 recent updates for all managed stores
-         String viewRecentOrdersQuery = "SELECT O.orderNumber, U.name AS customerName, O.storeID, O.productName, O.orderTime " +
-                "FROM Orders O JOIN Users U ON O.customerID = U.userID " +
-                "WHERE O.storeID IN (SELECT storeID FROM Store WHERE managerID = " + managerID + ") " +
-                "ORDER BY O.orderTime DESC LIMIT 5";
-        System.out.println("Recent orders for your managed stores:");
-        esql.executeQueryAndPrintResult(viewRecentOrdersQuery);
+         String viewRecentUpdatesQuery = "SELECT updateNumber, managerID, storeID, productName, updatedOn " +
+                 "FROM ProductUpdates WHERE storeID IN (SELECT storeID FROM Store WHERE managerID = " + managerID +
+                 ") ORDER BY updatedOn DESC LIMIT 5";
+         System.out.println("Recent updates for your managed stores:");
+         esql.executeQueryAndPrintResult(viewRecentUpdatesQuery);
      } catch (Exception e) {
          System.err.println("Error: " + e.getMessage());
      }
