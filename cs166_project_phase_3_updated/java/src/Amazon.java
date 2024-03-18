@@ -486,15 +486,14 @@ public class Amazon {
    }
 
 //William
-//sub-function of placeOrder()
+//sub-function1 of placeOrder()
    public static int selectStore(Amazon esql) {
       String ID;
       int IDint;
-      boolean next = false;
       
       while(true) {
          try {
-            System.out.print("\nEnter Store ID or enter 0 to go back: ");
+            System.out.print("\nEnter Store ID or enter 0 to go back to Main Menu: ");
             ID = in.readLine();
             ID = ID.replaceAll("\\s","");
             if(!esql.isNumeric(ID)){
@@ -507,7 +506,6 @@ public class Amazon {
             }
             
             for(int i = 0; i < esql.nearbyStores.size(); i++) {
-               System.out.println(i);
                if(IDint == esql.nearbyStores.get(i)) {
                   return IDint;
                }
@@ -521,10 +519,148 @@ public class Amazon {
       }
    }
    
-   public static void placeOrder(Amazon esql) {
-      int StoreID;
+//William
+//sub-function2 of placeOrder()
+   public static String selectProduct(Amazon esql, int storeID) {
+      String product, query; 
+      List<List<String>> res;
+      while(true) {
+         try {
+            System.out.print("\nEnter Product name or enter 0 to go back: ");
+            product = in.readLine();
+            product = product.trim();
+            if(esql.isNumeric(product)) {
+               if(Integer.parseInt(product) == 0) {
+                  return "0";
+               }  
+            }
+            query = String.format("SELECT productName FROM Product WHERE storeID = %d AND productName = '%s'", storeID, product);
+            res = esql.executeQueryAndReturnResult(query);
+            if(res.size() > 0) {
+               return res.get(0).get(0);
+            }
+            else {
+               System.out.println("Could not find product with name: " + product);
+            }
+         }
+         catch (Exception e) {
+            System.err.println (e.getMessage ());
+            return "";
+         }
+      }
+   }
 
-      StoreID = esql.selectStore(esql);
+//William
+//sub-function3 of placeOrder()
+   public static int selectCount(Amazon esql, int storeID, String productName) {
+      String count, query;
+      List<List<String>> res;
+      int countNum, available;
+      
+      while(true) {
+         try {
+            System.out.print("\nEnter quantity or enter 0 to go back: ");
+            count = in.readLine();
+            count = count.replaceAll("\\s","");
+            if(!esql.isNumeric(count)){
+               System.out.println("Please enter only digits for the quantity");
+               continue;
+            }
+            countNum = Integer.parseInt(count);
+            if(countNum == 0) {
+               return 0;
+            }
+            query = String.format("SELECT numberOfUnits FROM Product WHERE storeID = %d AND productName = '%s'", storeID, productName);
+            res = esql.executeQueryAndReturnResult(query);
+            if(res.size() > 0) {
+               available = Integer.parseInt(res.get(0).get(0));
+               if(countNum <= available) {
+                  return countNum;
+               }
+               else {
+                  System.out.println("Error: count is too high");
+                  System.out.println("There are only " + available + " of this item available in this store");
+                  continue;
+               }
+            }
+            else {
+               System.out.println("ERROR: Response size is 0");
+               return -1;
+            }
+         }
+         catch (Exception e) {
+            System.err.println (e.getMessage ());
+            return -1;
+         }           
+      }
+   }
+
+   public static void placeOrder(Amazon esql) {
+      int storeID = 0; //prevent initialization warning
+      int count = 0;
+      String pName = "";
+      String choice = "";
+      String product = "";
+      int cur = 1;
+   
+      while(true) {
+         switch(cur) {
+            case 1:
+               storeID = esql.selectStore(esql);
+               if(storeID == 0) {
+                  return;
+               }
+               cur = 2;
+               break;
+            case 2:
+               pName = esql.selectProduct(esql, storeID);
+               pName = pName.trim();
+               if(esql.isNumeric(pName)) {
+                  if(Integer.parseInt(pName) == 0) {
+                     cur = 1;
+                     break;
+                  }  
+               }
+               cur = 3;
+               break;
+            case 3:
+               count = esql.selectCount(esql, storeID, pName);
+               if(count == 0) {
+                  cur = 2;
+                  break;
+               }
+               cur = 4;
+               break;
+            case 4:
+               System.out.println("\nStore ID: " + storeID + "   Product: " + pName + "     Quantity: " + count);
+               System.out.println("Enter y to confirm order\nEnter b to go back\nEnter n to cancel order");
+               try {
+                  product = in.readLine();
+                  product = product.trim();
+                  switch(product) {
+                     case "y":
+                        cur = 5;
+                        break;
+                     case "b":
+                        cur = 3;
+                        break;
+                     case "n":
+                        return;
+                     default:
+                        System.out.println("Error at order confirmation");
+                  }
+               }
+               catch (Exception e) {
+                  System.err.println (e.getMessage ());
+                  return;
+               }      
+               break;
+            case 5:
+               System.out.println("in case 5");
+               return;
+            default: break;
+         }
+      }
    }
 
 //William And Jeffrey
@@ -811,6 +947,6 @@ public class Amazon {
           System.err.println("Error: " + e.getMessage());
       }
   }
-  
+
 }//end Amazon
 
