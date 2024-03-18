@@ -712,6 +712,7 @@ public class Amazon {
       int isManager = 0;
       String query, str;
       List<List<String>> res;
+      int resInt;
       isManager = esql.checkIfManager(esql);
       if(isManager == -1) { //if user
          try {
@@ -737,7 +738,7 @@ public class Amazon {
             "WHERE O.customerID = U.userID " +
             "AND O.storeID IN (SELECT storeID FROM Store WHERE managerID = " + isManager + ") " +
             "ORDER BY O.orderTime DESC";
-            res = esql.executeQueryAndPrintResult(query);
+            resInt = esql.executeQueryAndPrintResult(query);
          }
          catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
