@@ -243,7 +243,6 @@ public class Amazon {
 
          boolean keepon = true;
          while(keepon) {
-            System.out.println("#### DEBUG MODE ###");
             // These are sample SQL statements
             System.out.println("MAIN MENU");
             System.out.println("---------");
@@ -711,18 +710,25 @@ public class Amazon {
       //if user then view own most recent 5
       //if manager then all order info of stores they manage
       int isManager = 0;
-      String query;
-      int res;
-      isManager = checkIfManager(esql);
+      String query, str;
+      List<List<String>> res;
+      isManager = esql.checkIfManager(esql);
       if(isManager == -1) { //if user
          try {
             query = String.format("SELECT * FROM Orders WHERE CustomerID = %d ORDER BY orderTime DESC LIMIT 5", esql.userID);
-            res = esql.executeQueryAndPrintResult(query);
+            res = esql.executeQueryAndReturnResult(query); 
+            System.out.println(String.format("\n%-15s%-12s%-30s%-15s    %s", "Order Number", "Store ID", "Product Name", "Units Ordered", "Order Time" ));
+            System.out.println("------------------------------------------------------------------------------------------------------");
+            for(int i = 0; i < res.size(); i++) {
+               str = String.format("%-15s%-12s%-30s%-15s    %s", res.get(i).get(0), res.get(i).get(2), res.get(i).get(3).trim(), res.get(i).get(4), res.get(i).get(5));
+               System.out.println(str);
+            }
+            System.out.println();
          }
          catch (Exception e) {
             System.err.println (e.getMessage ());
             return;
-         }           
+}           
       }
       else { // if manager
          try {
@@ -735,7 +741,7 @@ public class Amazon {
          }
          catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
-        }
+         }           
       }
       return;
    }
